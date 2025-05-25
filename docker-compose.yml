@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "50051:50051" # Expose backend gRPC port
+    volumes:
+      - ./backend:/app # Mount backend code for development (optional, good for dev)
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000" # Expose Next.js development port
+    volumes:
+      - ./frontend:/app # Mount frontend code for live reload
+      - /app/node_modules # Persist node_modules separately
+      - /app/.next # Persist .next folder separately
+    depends_on:
+      - backend # Optional: Ensures backend starts before frontend attempts to connect
