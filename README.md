@@ -1,42 +1,23 @@
 # Yuno gRPCサーバー
 
-このプロジェクトは、会議関連の機能を提供するgRPCサーバーです。現在、双方向ストリーミングRPC (`ProcessMeeting`) を中心とした機能を提供しています。
+## 概要
+
+このプロジェクトは、会議関連の機能を提供するgRPCバックエンドと、Next.jsで構築されたフロントエンドで構成されています。全体はDockerによって管理されます。
 
 ## プロジェクト構成
 
-プロジェクトは以下のファイルで構成されています。
-
-*   **`meeting.proto`**:
-    *   gRPCサービスの定義ファイルです (Protocol Buffers形式)。
-    *   サービスメソッド、リクエストメッセージ、レスポンスメッセージの構造を定義します。
-    *   主なRPCメソッド:
-        *   `ProcessMeeting (stream MeetingStreamRequest) returns (stream MeetingStreamResponse)`: 会議の処理を行うための主要な双方向ストリーミングRPCです。クライアントは会議の初期設定、音声チャンク、重要事項マーカーなどをストリームで送信でき、サーバーは会議IDの確認、部分/最終文字起こし結果、要約、重要事項の確認などをストリームで返します。
-        *   (オプション: もし既存の単項RPCもユーザーが利用可能として残す場合、それらも簡単に記載)
-            *   `SaveImportance`, `TranscribeAndSummarize`, `SaveMetadata`, `EditMetadata`, `DeleteMetadata`: 以前の単項RPCメソッド群です。（現在は主に `ProcessMeeting` に統合されていますが、互換性のために残されている場合もあります）。
-
-*   **`meeting_pb2.py`**:
-    *   `meeting.proto` ファイルからProtocol Bufferコンパイラによって自動生成されたPythonコードです。
-    *   `.proto`ファイルで定義されたメッセージ (`InitialSetup`, `AudioChunk`, `MeetingInitialized` など) のためのPythonクラスが含まれています。
-    *   **このファイルは手動で編集しないでください。**
-
-*   **`meeting_pb2_grpc.py`**:
-    *   `meeting.proto` ファイルからgRPC Pythonツールによって自動生成されたPythonコードです。
-    *   クライアントがサーバーメソッドを呼び出すためのスタブ (`MeetingServiceStub`) と、サーバーがサービスを実装するための基底クラス (`MeetingServiceServicer`) が含まれています。
-    *   **このファイルは手動で編集しないでください。**
-
-*   **`server.py`**:
-    *   gRPCサーバーのメインスクリプトです。
-    *   `MeetingServiceServicer` の実装を含んでおり、クライアントからのリクエストを処理するロジックがここに記述されています。
-    *   新しい双方向ストリーミングRPC `ProcessMeeting` の具体的な処理フロー（初期設定の受信、音声チャンクの処理、文字起こしと要約のシミュレーション、重要事項マーカーの処理など）が実装されています。
-    *   サーバーの起動とポートの待受もこのファイルで行います。
-
-*   **`requirements.txt`**:
-    *   このプロジェクトを実行するために必要なPythonパッケージとそのバージョンがリストされています。
-    *   主に `grpcio` と `grpcio-tools` が含まれます。
-    *   `pip install -r requirements.txt` を使用して依存関係をインストールできます。
-
-*   **`README.md`**:
-    *   このファイルです。プロジェクトの概要、構成、および使用方法について説明します。
+*   **`backend/`**: Pythonで実装されたgRPCサーバー関連のファイルが含まれます。
+    *   `Dockerfile`: バックエンドサービス（gRPCサーバー）のコンテナ環境を定義します。
+    *   `meeting.proto`: gRPCサービス（`ProcessMeeting` RPCなど）とそのメッセージ型をProtocol Buffers形式で定義します。
+    *   `server.py`: `meeting.proto`で定義されたサービスのサーバー側実装です。会議処理のロジックが含まれます。
+    *   `requirements.txt`: Python環境に必要な依存パッケージのリストです。
+*   **`frontend/`**: Next.jsで実装されたフロントエンドアプリケーション関連のファイルが含まれます。
+    *   `Dockerfile`: フロントエンドサービス（Next.jsアプリケーション）のコンテナ環境を定義します。
+    *   `pages/`: Next.jsアプリケーションのページコンポーネントが配置されます。
+    *   `package.json`: Node.jsプロジェクトの依存関係やスクリプト（ビルド、開発サーバー起動など）を定義します。
+*   **`docker-compose.yml`**: バックエンドとフロントエンドのサービスを連携して起動・管理するためのDocker Compose設定ファイルです。
+*   **`.gitignore`**: Gitのバージョン管理から除外するファイルやディレクトリを指定します。
+*   **`README.md`**: このファイルです。プロジェクトの概要、構成、セットアップ方法について説明します。
 
 ## 双方向ストリーミングRPC: `ProcessMeeting`
 
@@ -55,8 +36,8 @@
 ```python
 # (これは概念的なクライアントコードであり、実際には動作するクライアントスクリプトが必要です)
 # import grpc
-# import meeting_pb2
-# import meeting_pb2_grpc
+# import meeting_pb2 # backend/meeting_pb2.py に相当
+# import meeting_pb2_grpc # backend/meeting_pb2_grpc.py に相当
 
 # channel = grpc.insecure_channel('localhost:50051')
 # stub = meeting_pb2_grpc.MeetingServiceStub(channel)
@@ -75,6 +56,7 @@
 #             audio_chunk=meeting_pb2.AudioChunk(content=b"some_audio_data_chunk_{i}", sequence_number=i)
 #         )
 #         yield audio_chunk_request
+#         # import time
 #         # time.sleep(0.5) # 実際の音声ストリーミングをシミュレート
 
 #     # 3. ImportanceMarker を送信
@@ -93,14 +75,30 @@
 #     # ... 他のレスポンスタイプも同様に処理 ...
 ```
 
-## サーバーの起動方法
+## アプリケーションの実行方法
 
-1.  必要な依存関係をインストールします:
-    ```bash
-    pip install -r requirements.txt
-    ```
-2.  サーバーを起動します:
-    ```bash
-    python server.py
-    ```
-    デフォルトでは、サーバーはポート `50051` で待受します。
+### 前提条件
+
+*   Docker がインストールされていること。
+*   Docker Compose がインストールされていること。
+
+### ビルドと実行
+
+以下のコマンドを実行して、バックエンドとフロントエンドのサービスをビルドし、起動します。
+
+```bash
+docker-compose up --build
+```
+
+### アクセス
+
+*   **フロントエンド**: ブラウザで `http://localhost:3000` にアクセスします。
+*   **バックエンド (gRPC)**: サービスは `localhost:50051` で利用可能になります。
+
+## アプリケーションの停止方法
+
+以下のコマンドを実行して、起動しているサービスを停止します。
+
+```bash
+docker-compose down
+```
