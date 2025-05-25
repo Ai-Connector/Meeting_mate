@@ -1,4 +1,4 @@
-# Meeting Mate gRPCサーバー
+# Yuno gRPCサーバー
 
 このプロジェクトは、会議関連の機能を提供するgRPCサーバーです。現在、双方向ストリーミングRPC (`ProcessMeeting`) を中心とした機能を提供しています。
 
