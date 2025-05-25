@@ -59,13 +59,20 @@ class MeetingServiceStub(object):
                 request_serializer=meeting__pb2.DeleteMetadataRequest.SerializeToString,
                 response_deserializer=meeting__pb2.DeleteMetadataResponse.FromString,
                 _registered_method=True)
+        self.ProcessMeeting = channel.stream_stream(
+                '/meeting.MeetingService/ProcessMeeting',
+                request_serializer=meeting__pb2.MeetingStreamRequest.SerializeToString,
+                response_deserializer=meeting__pb2.MeetingStreamResponse.FromString,
+                _registered_method=True)
 
 
 class MeetingServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def SaveImportance(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """Keep existing unary methods for now as per instruction to modify current server.
+        We will later evaluate if they should be removed or if this new stream replaces them.
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
@@ -90,6 +97,13 @@ class MeetingServiceServicer(object):
 
     def DeleteMetadata(self, request, context):
         """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ProcessMeeting(self, request_iterator, context):
+        """New bidirectional streaming RPC
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
@@ -121,6 +135,11 @@ def add_MeetingServiceServicer_to_server(servicer, server):
                     servicer.DeleteMetadata,
                     request_deserializer=meeting__pb2.DeleteMetadataRequest.FromString,
                     response_serializer=meeting__pb2.DeleteMetadataResponse.SerializeToString,
+            ),
+            'ProcessMeeting': grpc.stream_stream_rpc_method_handler(
+                    servicer.ProcessMeeting,
+                    request_deserializer=meeting__pb2.MeetingStreamRequest.FromString,
+                    response_serializer=meeting__pb2.MeetingStreamResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -258,6 +277,33 @@ class MeetingService(object):
             '/meeting.MeetingService/DeleteMetadata',
             meeting__pb2.DeleteMetadataRequest.SerializeToString,
             meeting__pb2.DeleteMetadataResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ProcessMeeting(request_iterator,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.stream_stream(
+            request_iterator,
+            target,
+            '/meeting.MeetingService/ProcessMeeting',
+            meeting__pb2.MeetingStreamRequest.SerializeToString,
+            meeting__pb2.MeetingStreamResponse.FromString,
             options,
             channel_credentials,
             insecure,

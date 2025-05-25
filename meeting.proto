@@ -2,14 +2,7 @@ syntax = "proto3";
 
 package meeting;
 
-service MeetingService {
-  rpc SaveImportance (SaveImportanceRequest) returns (SaveImportanceResponse);
-  rpc TranscribeAndSummarize (TranscribeAndSummarizeRequest) returns (TranscribeAndSummarizeResponse);
-  rpc SaveMetadata (SaveMetadataRequest) returns (SaveMetadataResponse);
-  rpc EditMetadata (EditMetadataRequest) returns (EditMetadataResponse);
-  rpc DeleteMetadata (DeleteMetadataRequest) returns (DeleteMetadataResponse);
-}
-
+// Keep existing messages for now, they might be reused or referred to.
 message SaveImportanceRequest {
   string item_name = 1;
   int32 importance = 2;
@@ -21,8 +14,9 @@ message SaveImportanceResponse {
   string message = 2;
 }
 
+// TranscribeAndSummarizeRequest is mostly for unary. We'll make a new one for streaming.
 message TranscribeAndSummarizeRequest {
-  bytes audio_data = 1;
+  bytes audio_data = 1; // This would be a large single chunk for unary
   string audio_format = 2;
 }
 
@@ -65,4 +59,87 @@ message DeleteMetadataRequest {
 message DeleteMetadataResponse {
   bool success = 1;
   string message = 2;
+}
+
+// New messages for the bidirectional stream
+message MeetingStreamRequest {
+  oneof payload {
+    InitialSetup initial_setup = 1;
+    AudioChunk audio_chunk = 2;
+    ImportanceMarker importance_marker = 3;
+    // Potentially other control messages from client
+  }
+}
+
+message InitialSetup {
+  string meeting_id = 1; // Optional: client provides ID or server generates one
+  string audio_format = 2; // e.g., "wav", "opus"
+  SaveMetadataRequest metadata = 3; // Reuse existing metadata message
+}
+
+message AudioChunk {
+  bytes content = 1;
+  int32 sequence_number = 2; // For ordering
+}
+
+message ImportanceMarker {
+  string item_name = 1;
+  int32 importance_score = 2; // Renamed from 'importance' for clarity
+  string details = 3;
+  int64 timestamp_ms = 4; // Relative to start of audio stream
+}
+
+message MeetingStreamResponse {
+  oneof payload {
+    MeetingInitialized confirmation = 1;
+    PartialTranscription partial_transcription = 2;
+    FinalTranscription final_transcription = 3;
+    SummaryResult summary_result = 4;
+    ImportanceSavedAck importance_ack = 5;
+    StreamError error = 6; // For stream-specific errors
+  }
+}
+
+message MeetingInitialized {
+  string meeting_id = 1; // Server confirms/provides meeting ID
+  bool success = 2;
+  string message = 3;
+}
+
+message PartialTranscription {
+  string transcript_segment = 1;
+  int32 sequence_number = 2; // Corresponds to an audio chunk or group of chunks
+  bool is_interim = 3;
+}
+
+message FinalTranscription {
+  string full_transcript = 1;
+}
+
+message SummaryResult {
+  string summary_text = 1;
+}
+
+message ImportanceSavedAck {
+  string item_name = 1;
+  bool success = 2;
+  string message = 3;
+}
+
+message StreamError {
+  int32 code = 1; // Corresponds to grpc.StatusCode or custom codes
+  string message = 2;
+}
+
+service MeetingService {
+  // Keep existing unary methods for now as per instruction to modify current server.
+  // We will later evaluate if they should be removed or if this new stream replaces them.
+  rpc SaveImportance (SaveImportanceRequest) returns (SaveImportanceResponse);
+  rpc TranscribeAndSummarize (TranscribeAndSummarizeRequest) returns (TranscribeAndSummarizeResponse);
+  rpc SaveMetadata (SaveMetadataRequest) returns (SaveMetadataResponse);
+  rpc EditMetadata (EditMetadataRequest) returns (EditMetadataResponse);
+  rpc DeleteMetadata (DeleteMetadataRequest) returns (DeleteMetadataResponse);
+
+  // New bidirectional streaming RPC
+  rpc ProcessMeeting (stream MeetingStreamRequest) returns (stream MeetingStreamResponse);
 }
