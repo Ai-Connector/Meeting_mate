@@ -1,0 +1,48 @@
+version: '3.8' # Docker Composeのバージョンを指定 (Specify docker-compose version)
+
+services:
+  # Backend Python gRPCサービス (Backend Python gRPC Service)
+  backend:
+    build:
+      context: ./backend # ビルドコンテキストのパス (Path to build context)
+      dockerfile: Dockerfile # Dockerfileの名前 (Name of the Dockerfile)
+    ports:
+      - "50051:50051" # gRPCポートを公開 (Expose gRPC port)
+    # volumes: # 開発時にホットリロードを有効にする場合 (Uncomment for development to enable hot-reloading)
+      # - ./backend:/app/backend
+      # - ./protos:/app/protos
+    networks:
+      - grpc_network
+
+  # Frontend Next.jsアプリケーション (Frontend Next.js Application)
+  frontend:
+    build:
+      context: ./frontend # ビルドコンテキストのパス (Path to build context)
+      dockerfile: Dockerfile # Dockerfileの名前 (Name of the Dockerfile)
+    ports:
+      - "3000:3000" # Next.jsアプリケーションのポートを公開 (Expose Next.js app port)
+    depends_on:
+      - backend # backendサービスの後に起動 (Ensures backend is started before frontend)
+      - envoy   # envoyサービスの後に起動 (Ensures envoy is started before frontend)
+    # volumes: # 開発用 (Uncomment for development)
+      # - ./frontend:/app 
+      # - /app/node_modules # ホストボリュームでnode_modulesが上書きされるのを防ぐ (Exclude node_modules from being overwritten)
+    networks:
+      - grpc_network
+
+  # Envoyプロキシ (Envoy Proxy for gRPC-Web)
+  envoy:
+    image: envoyproxy/envoy:v1.28-latest # Envoyの特定のバージョンを使用 (Use a specific version of Envoy)
+    ports:
+      - "8080:8080" # フロントエンドが接続するポート (Port frontend connects to)
+      - "9901:9901" # Envoyの管理ポート (オプション) (Admin port for Envoy (optional))
+    volumes:
+      - ./envoy.yaml:/etc/envoy/envoy.yaml # Envoy設定ファイルをマウント (Mount the Envoy configuration)
+    depends_on:
+      - backend # backendサービスの後に起動 (Ensures backend is started before envoy)
+    networks:
+      - grpc_network
+
+networks:
+  grpc_network: # サービス間通信用の共通ネットワークを定義 (Define a common network for services to communicate)
+    driver: bridge # ブリッジドライバーを使用 (Use bridge driver)

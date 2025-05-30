@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package counter;
+
+// The service definition.
+// サービス定義
+service Counter {
+  // Bidirectional streaming RPC
+  // 双方向ストリーミングRPC
+  rpc CountCharacters (stream CharacterRequest) returns (stream CharacterResponse);
+}
+
+// The request message containing the text.
+// テキストを含むリクエストメッセージ
+message CharacterRequest {
+  string text = 1;
+}
+
+// The response message containing the character count.
+// 文字数を含むレスポンスメッセージ
+message CharacterResponse {
+  int32 count = 1;
+}
