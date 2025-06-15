@@ -14,10 +14,10 @@ COPY backend /app/backend
 ENV PYTHONPATH /app
 
 # backendディレクトリに移動して依存関係をインストール (Move to the backend directory and install dependencies)
-RUN pip install --no-cache-dir -r backend/requirements.txt
+RUN pip install --no-cache-dir -r /app/backend/requirements.txt
 
 # ポートを公開 (Expose the port)
 EXPOSE 50051
 
 # サーバーを実行するコマンドを指定 (Specify the command to run the server)
-CMD ["python", "backend/server.py"]
+CMD ["python", "/app/backend/server.py"]

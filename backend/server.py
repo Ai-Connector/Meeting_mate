@@ -4,8 +4,8 @@ from concurrent import futures
 import time
 
 # 生成されたgRPCコードのインポート (Import generated gRPC code)
-import counter_pb2
-import counter_pb2_grpc
+from protos import counter_pb2
+from protos import counter_pb2_grpc
 
 # CounterServicerクラスの定義 (Define CounterServicer class)
 class CounterServicer(counter_pb2_grpc.CounterServicer):

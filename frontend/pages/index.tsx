@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 // 日本語: 生成されたgRPCコードのインポート (Import generated gRPC code)
 // messages (メッセージ)
-import { CharacterRequest, CharacterResponse } from '../../generated/counter_pb'; 
+import { CharacterRequest, CharacterResponse } from '../generated/counter_pb'; 
 // service client (サービスクライアント)
-import { CounterClient } from '../../generated/counter_pb_service'; 
+import { CounterClient } from '../generated/counter_pb_service'; 
 // grpc-web stream type, ClientReadableStream is a generic type.
 // For a bidirectional stream, the client's stream object methods are directly available.
 // We will type it as 'any' for simplicity as in many examples, 
@@ -42,13 +42,13 @@ const HomePage: React.FC = () => {
       setError(''); // 日本語: 前のエラーをクリア (Clear previous errors)
     });
 
-    // 日本語: エラー発生時の処理 (Process errors)
-    // grpc-webのRpcError型を使用 (Use RpcError type from grpc-web for the error object)
-    stream.on('error', (err: any) => { // err is of type grpcWeb.RpcError
-      console.error('ストリームエラー (Stream Error):', err);
-      setError(`エラー: ${err.message}`); // 日本語: Error message (Error: ${err.message})
-      // More robust error handling might be needed depending on the error type
-      // For example, err.code can give more specific gRPC error codes.
+    // 日本語: エラー発生時の処理 (Process errors via status)
+    // gRPC-webではstatusイベントでエラーを処理します (Handle errors via status event in gRPC-web)
+    stream.on('status', (status) => {
+      if (status.code !== 0) { // 0 = OK, non-zero = error
+        console.error('ストリームエラー (Stream Error):', status);
+        setError(`エラー: ${status.details}`); // 日本語: Error message
+      }
     });
 
     // 日本語: ストリーム終了時の処理 (Process stream end)
@@ -97,4 +97,3 @@ const HomePage: React.FC = () => {
 };
 
 export default HomePage;
-```

@@ -4,8 +4,8 @@ services:
   # Backend Python gRPCサービス (Backend Python gRPC Service)
   backend:
     build:
-      context: ./backend # ビルドコンテキストのパス (Path to build context)
-      dockerfile: Dockerfile # Dockerfileの名前 (Name of the Dockerfile)
+      context: . # ビルドコンテキストのパス (Path to build context)
+      dockerfile: backend/Dockerfile # Dockerfileの名前 (Name of the Dockerfile)
     ports:
       - "50051:50051" # gRPCポートを公開 (Expose gRPC port)
     # volumes: # 開発時にホットリロードを有効にする場合 (Uncomment for development to enable hot-reloading)
@@ -17,8 +17,8 @@ services:
   # Frontend Next.jsアプリケーション (Frontend Next.js Application)
   frontend:
     build:
-      context: ./frontend # ビルドコンテキストのパス (Path to build context)
-      dockerfile: Dockerfile # Dockerfileの名前 (Name of the Dockerfile)
+      context: . # ビルドコンテキストのパス (Path to build context)
+      dockerfile: frontend/Dockerfile # Dockerfileの名前 (Name of the Dockerfile)
     ports:
       - "3000:3000" # Next.jsアプリケーションのポートを公開 (Expose Next.js app port)
     depends_on:
