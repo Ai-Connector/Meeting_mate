@@ -1,0 +1,71 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.env
+
+# Firebase
+firebase-debug.log
+firebase-debug.*.log
+.firebase/
+serviceAccountKey.json
+*-service-account.json
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Docker
+.dockerignore
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Audio files (if they should not be tracked)
+# Uncomment if you don't want to track audio files
+# *.mp3
+# *.wav
+
+# Temporary files
+tmp_*
+.tmp/
+temp/
+
+# Environment variables
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Google Cloud / Gemini AI credentials
+*.json
+!package.json
+!package-lock.json
