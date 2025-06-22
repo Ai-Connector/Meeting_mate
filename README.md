@@ -21,6 +21,7 @@ docker-compose up
 ```
 
 これにより、アプリケーションは http://localhost:8000 でアクセス可能になります。
+http://localhost:8000/docs でSwaggerドキュメント自動生成
 
 * 任意のオリジンからリクエスト可能（CORS設定済み）。
 
