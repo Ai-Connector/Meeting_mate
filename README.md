@@ -121,6 +121,32 @@ GET /meetings/{meeting_id}/sections?full=true
 4. **イベント順序管理**: `sequenceNumber` を利用し再接続・欠落検知をサポート
 5. **モックのライフサイクル**: アプリ再起動で全データリセット、永続化なし
 6. **Swagger UI**: `http://localhost:8000/docs` でドキュメント自動生成
+7. **Swagger JSON**: `http://localhost:8000/openapi.json` で OpenAPI 仕様を取得可能
+
+---
+
+## 5. Swagger ドキュメントの保存
+
+APIの Swagger ドキュメントをローカルファイルとして保存するには、以下の方法があります：
+
+### 5.1 save_swagger.py スクリプトを使用する
+
+```bash
+# サーバーが実行中であることを確認してから:
+python save_swagger.py --url http://localhost:8000 --output swagger.json
+```
+
+### 5.2 save_swagger.sh スクリプトを使用する
+
+```bash
+# 実行権限を付与
+chmod +x save_swagger.sh
+
+# 実行
+./save_swagger.sh --url http://localhost:8000 --output swagger.json
+```
+
+これにより、OpenAPI 仕様が JSON ファイルとして保存され、API クライアントの生成やドキュメントの共有に利用できます。
 
 ---
 
