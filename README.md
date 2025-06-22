@@ -12,14 +12,15 @@
 
 ## 2. セットアップと起動方法
 
+### Docker Compose を使用する方法（推奨）
+
 ```bash
 git clone <repo-url>
-cd realtime-minutes-mock
-python -m venv .venv
-source .venv/bin/activate
-pip install fastapi uvicorn
-uvicorn app:app --reload --host 0.0.0.0 --port 8000
+cd yuno
+docker-compose up
 ```
+
+これにより、アプリケーションは http://localhost:8000 でアクセス可能になります。
 
 * 任意のオリジンからリクエスト可能（CORS設定済み）。
 
