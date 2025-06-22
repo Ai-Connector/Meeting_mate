@@ -136,18 +136,6 @@ APIの Swagger ドキュメントをローカルファイルとして保存す�
 python save_swagger.py --url http://localhost:8000 --output swagger.json
 ```
 
-### 5.2 save_swagger.sh スクリプトを使用する
-
-```bash
-# 実行権限を付与
-chmod +x save_swagger.sh
-
-# 実行
-./save_swagger.sh --url http://localhost:8000 --output swagger.json
-```
-
-これにより、OpenAPI 仕様が JSON ファイルとして保存され、API クライアントの生成やドキュメントの共有に利用できます。
-
 ---
 
 上記を `README.md` 等に貼り付け、フロント開発にご利用ください。
