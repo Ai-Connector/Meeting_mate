@@ -16,7 +16,7 @@
 
 ```bash
 git clone <repo-url>
-cd yuno
+cd yuno-backend
 docker-compose up
 ```
 
